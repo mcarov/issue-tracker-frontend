@@ -1,3 +1,7 @@
+const issueTable = document.getElementById("issueTable");
+const searchButton = document.getElementById("searchButton");
+const searchField = document.getElementById("searchField");
+
 async function getIssues() {
     try {
         const reply = await fetch('http://localhost:8080/api/issues');
@@ -15,6 +19,9 @@ async function searchForIssues(query) {
         const reply = await fetch(`http://localhost:8080/api/search/issues?q=${query}`);
         const data = await reply.json();
         console.log(data);
+        if(issueTable.childElementCount === 2) {
+            issueTable.removeChild(issueTable.lastChild);
+        }
         createTableBody(data);
     }
     catch (e) {
@@ -22,10 +29,9 @@ async function searchForIssues(query) {
     }
 }
 
-function createTableBody(data) {
-    const table = document.getElementById("table");
+function createTableBody(array) {
     const tbody = document.createElement('tbody');
-    for(const i of data) {
+    for(const i of array) {
         let tr = document.createElement('tr');
 
         let td = document.createElement('td');
@@ -63,7 +69,19 @@ function createTableBody(data) {
 
         tbody.appendChild(tr);
     }
-    table.appendChild(tbody);
+    issueTable.appendChild(tbody);
 }
 
-getIssues();
+if(issueTable.childElementCount === 1) {
+    getIssues();
+}
+
+searchButton.addEventListener('click', function () {
+    searchForIssues(searchField.value);
+});
+
+searchField.addEventListener('keyup', function (e) {
+    if(e.code === 'Enter') {
+        searchForIssues(this.value);
+    }
+});
